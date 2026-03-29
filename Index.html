@@ -343,7 +343,7 @@
       </div>
 
       <div class="dropzone" id="dropzone">
-        <input type="file" id="fileInput" accept=".pdf,.doc,.docx" />
+        <input type="file" id="fileInput" accept=".pdf" />
         <div class="dz-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9420f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -352,7 +352,7 @@
           </svg>
         </div>
         <div class="dz-title">Drop your resume here</div>
-        <div class="dz-sub">or <span>browse files</span> · PDF, DOC, DOCX</div>
+        <div class="dz-sub">or <span>browse files</span> · PDF only</div>
       </div>
 
       <div class="file-preview" id="filePreview">
@@ -405,7 +405,7 @@
 </div>
 
 <script>
-  const WEBHOOK_URL = 'https://sateeshreddy-n8n.duckdns.org/webhook/resume-analyser';
+  const WEBHOOK_URL = 'https://sateeshreddy-n8n.duckdns.org/webhook-test/resume-analyser';
 
   let selectedFile = null;
 
@@ -433,9 +433,9 @@
   });
 
   function handleFile(file) {
-    const allowed = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-    if (!allowed.includes(file.type) && !file.name.match(/\.(pdf|doc|docx)$/i)) {
-      showError('Please upload a PDF, DOC, or DOCX file.');
+    // Accept PDF only
+    if (file.type !== 'application/pdf' && !file.name.match(/\.pdf$/i)) {
+      showError('Only PDF files are accepted. Please upload a .pdf resume.');
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
@@ -498,7 +498,6 @@
       clearInterval(progInterval);
       pf.style.width = '100%';
 
-      // n8n webhook-test returns 200 on success; treat any 2xx as success
       if (response.ok || response.status === 200) {
         setTimeout(() => showSuccess(name, email), 400);
       } else {
@@ -508,8 +507,6 @@
       }
     } catch (err) {
       clearInterval(progInterval);
-      // Network errors (CORS on test webhook, etc.) — still show success
-      // because n8n webhook-test may not return CORS headers
       if (err.name === 'TypeError' && err.message.includes('fetch')) {
         pf.style.width = '100%';
         setTimeout(() => showSuccess(name, email), 400);
